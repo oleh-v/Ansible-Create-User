@@ -1,4 +1,6 @@
-# ![Ansible](https://gquintana.github.io/images/logos/ansible.png) [Ansible](https://www.ansible.com). Create User (interactive)
+# [Ansible](https://www.ansible.com). Create User (interactive)
+
+![Ansible](https://cdn.slidesharecdn.com/profile-photo-ansible_it-96x96.jpg)
 
 This playbook create User and copy public key (if exist) or Generate keys pair on target machine
 * Adding a New User
