@@ -1,5 +1,5 @@
-# [Ansible](https://www.ansible.com). Create User (interactive)
-![Ansible](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ansible_Logo.png/128px-Ansible_Logo.png)
+# ![Ansible](https://gquintana.github.io/images/logos/ansible.png) [Ansible](https://www.ansible.com). Create User (interactive)
+
 This playbook create User and copy public key (if exist) or Generate keys pair on target machine
 * Adding a New User
 * Grant "Sudo" privileges
