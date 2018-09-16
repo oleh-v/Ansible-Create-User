@@ -5,7 +5,7 @@
   gather_facts: no
   vars_prompt:
   - name: target_machine
-    prompt: please enter the target host IP
+    prompt: Please enter IP (or hostname) of target machine
     private: no
   tasks:
     - add_host:
