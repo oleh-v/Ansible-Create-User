@@ -1,0 +1,47 @@
+---
+# This playbook create User and adds user to groups if defined and copy his public key to target server.
+
+- hosts: localhost
+  gather_facts: no
+  vars_prompt:
+  - name: target_machine
+    prompt: please enter the target host IP
+    private: no
+  tasks:
+    - add_host:
+        name: "{{ target_machine }}"
+        groups: dynamically_created_hosts
+
+- name: Create User, usermod, copy key
+  hosts: dynamically_created_hosts
+  remote_user: root
+
+  vars_prompt:
+
+    - name: "username"
+      prompt: "Username of New User"
+      default: ""
+      private: no
+
+    - name: "comment"
+      prompt: "Comment"
+      default: ""
+      private: no
+
+    - name: "make_root"
+      prompt: "Grant Sudo Privileges to new User? (y|n)"
+      default: "n"
+      private: no
+
+    - name: "primary_group"
+      prompt: "Change primary group? (group should be exist on target machine) / or leave blank"
+      default: ""
+      private: no
+
+    - name: "add_to_groups"
+      prompt: "Add user to additional groups? (groups should be exist on target machine) Write groups coma separated / or leave blank"
+      default: ""
+      private: no
+
+  roles:
+    - 01_user

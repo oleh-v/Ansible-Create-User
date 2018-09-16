@@ -1,0 +1,101 @@
+---
+# Add User
+
+#- include_vars: ../../group_vars/users.yml
+
+
+
+##########
+
+- name: Create new User
+  user:
+    name: "{{ username }}"
+    comment: "{{ comment }}"
+    shell: /bin/bash
+    createhome: yes
+    groups: "{{ add_to_groups }}"
+    state: present
+  when: username is defined
+
+
+- block:
+    - name: Add user to root if defined (CentOS)
+      user:
+        name: "{{ username }}"
+        groups: wheel
+        append: yes
+      when: make_root == "y"
+  when: ansible_distribution == "CentOS"
+
+- block:
+    - name: Add user to root if defined (Ubuntu)
+      user:
+        name: "{{ username }}"
+        groups: sudo
+        append: yes
+      when: make_root == "y"
+  when: ansible_distribution == "Ubuntu"
+
+- name: Change user's primary group if defined
+  user:
+    name: "{{ username }}"
+    group: "{{ primary_group }}"
+  when: not((primary_group is undefined) or (primary_group is none) or (primary_group  == ''))
+
+###
+
+- name: Check key files
+  local_action: stat path=keys/{{ username }}.pub
+  register: r
+
+### DEBUG ###
+- debug: msg={{ r.stat.exists }}
+#  with_items: "{{ r.results }}"
+###
+
+- name: Upload Key (for existing key)
+  authorized_key:
+    user: "{{ username }}"
+    key: "{{ lookup('file', '../../keys/{{ username }}.pub') }}"
+  when: r.stat.exists == true
+
+- name: Generate keys pair (if no key here)
+  user:
+    name: "{{ username }}"
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_comment: Key for "{{ username }}"
+#    ssh_key_file: .ssh/authorized_keys
+#    ssh_key_passphrase:
+    ssh_key_type: rsa
+    state: present
+  when: r.stat.exists == false
+
+- name: Copy id_rsa.pub to authorized_keys
+  copy:
+    remote_src: True
+    src: /home/{{ username }}/.ssh/id_rsa.pub
+    dest: /home/{{ username }}/.ssh/authorized_keys
+  when: r.stat.exists == false
+
+- name: Remove old id_rsa.pub
+  file:
+    path: /home/{{ username }}/.ssh/id_rsa.pub
+    state: absent
+  when: r.stat.exists == false
+
+###
+
+- name: Store new private key locally
+  fetch:
+    src: /home/{{ username }}/.ssh/id_rsa
+    dest: keys/{{ username }}.id_rsa
+    flat: yes
+  when: r.stat.exists == false
+
+- name: Store new public key locally
+  fetch:
+    src: /home/{{ username }}/.ssh/authorized_keys
+    dest: keys/{{ username }}.pub
+    flat: yes
+  when: r.stat.exists == false
